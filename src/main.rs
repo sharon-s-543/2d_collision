@@ -1,64 +1,4 @@
-#[derive(Debug, Clone, Copy)]
-struct Vector {
-    x: f64,
-    y: f64,
-}
 
-impl Vector {
-    pub fn new(x: f64, y: f64) -> Self {
-        Vector {x, y}
-    }
-
-    pub fn add(&self, b: &Vector) -> Self {
-        Vector {x: self.x + b.x, y: self.y + b.y}
-    }
-
-    pub fn sub(&self, b: &Vector) -> Self {
-        Vector {x: self.x - b.x, y: self.y - b.y}
-    }
-
-    pub fn mul(&self, c: f64) -> Self {
-        Vector {x: c * self.x, y: c * self.y}
-    }
-
-    pub fn dot(&self, b: &Vector) -> f64 {
-        self.x * b.x + self.y * b.y
-    }
-    
-    pub fn len(&self) -> f64 {
-        ((self.x).powf(2.0) + (self.y).powf(2.0)).sqrt()
-    }
-
-    pub fn normalize(&self) -> Self {
-        self.mul(1.0 / self.len())
-    }
-}
-
-// ======================================================
-
-#[derive(Debug, Clone, Copy)]
-struct Particle {
-    position: Vector,
-    velocity: Vector,
-    mass: f64,
-    radius: f64,
-}
-
-impl Particle {
-    pub fn new(
-        position: Vector, velocity: Vector,
-        mass: f64, radius: f64
-        ) -> Self {
-            Particle {
-                position,
-                velocity,
-                mass,
-                radius,
-            }
-    }
-}
-
-// =================== MAIN FUNCTION ====================
 
 fn main() {
     println!("BILLIARD\n========\n");
@@ -102,6 +42,71 @@ fn main() {
     }
 }
 
+
+
+// =======================================================
+// ---------- Functions, Structs and Other Stuff ---------
+// =======================================================
+
+#[derive(Debug, Clone, Copy)]
+struct Vector {
+    x: f64,
+    y: f64,
+}
+
+impl Vector {
+    pub fn new(x: f64, y: f64) -> Self {
+        Vector {x, y}
+    }
+
+    pub fn add(&self, b: &Vector) -> Self {
+        Vector {x: self.x + b.x, y: self.y + b.y}
+    }
+
+    pub fn sub(&self, b: &Vector) -> Self {
+        Vector {x: self.x - b.x, y: self.y - b.y}
+    }
+
+    pub fn mul(&self, c: f64) -> Self {
+        Vector {x: c * self.x, y: c * self.y}
+    }
+
+    pub fn dot(&self, b: &Vector) -> f64 {
+        self.x * b.x + self.y * b.y
+    }
+    
+    pub fn len(&self) -> f64 {
+        ((self.x).powf(2.0) + (self.y).powf(2.0)).sqrt()
+    }
+
+    // pub fn normalize(&self) -> Self {
+    //     self.mul(1.0 / self.len())
+    // }
+}
+
+// ======================================================
+
+#[derive(Debug, Clone, Copy)]
+struct Particle {
+    position: Vector,
+    velocity: Vector,
+    mass: f64,
+    radius: f64,
+}
+
+impl Particle {
+    pub fn new(
+        position: Vector, velocity: Vector,
+        mass: f64, radius: f64
+        ) -> Self {
+            Particle {
+                position,
+                velocity,
+                mass,
+                radius,
+            }
+    }
+}
 // ======================================================
 
 fn time_at_collision(
@@ -161,38 +166,9 @@ fn velocity_f(
         let v_f2 = v_i2.add(&contact.mul((2.0*m1/(m1+m2))*u));
         return (v_f1, v_f2);
 
-        // *particle1 = Particle {
-        //     position: r_i1,
-        //     velocity_i: v_f1,
-        //     mass: m1,  
-        // };
-
-        // *particle2 = Particle {
-        //     position: r_i2,
-        //     velocity_i: v_f2,
-        //     mass: m2,
-        // };
-
     }
     println!("Particles are not colliding.");
     return ((*v_i1).clone(), (*v_i2).clone());
-
-    // ==========================================÷===÷=
-    // Let's look at the position at collision now
-    //
-    // |(r2-r1) + (v2-v1)t| = R1 + R2
-    //
-/*
-    let r = r_i2 - r_i1;
-    let v = v_i2 - v_i1;
-    let rad = &particle1.radius + &particle2.radius;
-
-    let a = v.dot(&v);
-    let b = 2 * r.dot(&v);
-    let c = r.dot(r) - rad*rad;
-
-    let time = 
-*/
 }
 
 fn quadratic(a: f64, b: f64, c: f64) -> Option<(f64, f64)> {
