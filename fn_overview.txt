@@ -1,0 +1,11 @@
+This file just displays an overview of the project.
+
+main.rs
+-------
+fn main()
+struct Vector, impl Vector
+struct Particle, impl Particle
+fn time_at_collision()
+fn velocity_f()
+fn quadratic()
+fn modulus()
