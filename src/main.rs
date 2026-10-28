@@ -3,7 +3,6 @@ use std::io::{self, Write};
 const HEIGHT: u32 = 300;
 const WIDTH:  u32 = 400;
 
-// fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn main() {
     println!("BILLIARD\n========\n");
     
@@ -169,32 +168,6 @@ fn detect_collision(mut particle1: Particle, mut particle2: Particle)
     particle2.velocity = v2;
 
     Some((time, particle1, particle2))
-
-    // match time_at_collision(&particle1, &particle2) {
-    //     Some (time) => {
-    //          // Find positions for the two particles at t.
-    //         let r_t1 = (particle1.position)
-    //             .add(&(particle1.velocity).mul(time));
-    //         let r_t2 = (particle2.position)
-    //             .add(&(particle2.velocity).mul(time));
-    //         *particle1.position = r_t1;
-    //         *particle2.position = r_t2;
-
-    //         match velocity_f(&mut particle1, &mut particle2) {
-    //             Some((v1, v2)) => {
-    //                 particle1.velocity = v1;
-    //                 particle2.velocity = v2;
-    //             }
-    //             None => None
-    //         };
-
-    //         println!("PARTICLE1: {:#?}", particle1);
-    //         println!("PARTICLE2: {:#?}", particle2);
-
-    //         return Some(time);
-    //     }
-    //     None => None
-    // }
 }
 
 fn time_at_collision(particle1: &Particle, particle2: &Particle) -> Option<f64>
