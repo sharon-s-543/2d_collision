@@ -3,6 +3,7 @@ use std::io::{self, Write};
 const HEIGHT: u32 = 300;
 const WIDTH:  u32 = 400;
 
+// fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn main() {
     println!("BILLIARD\n========\n");
     
@@ -19,16 +20,13 @@ fn main() {
     // %>÷;[#,[#>#&>@^^@^<@:@&!^!<!^@@@&@>;@>×<×&×>×;×&××
 
     let num_particles = loop {
-        // let mut num_particles = String::new();
         print!("Number of particles: ");
         io::stdout().flush().expect("Failed to flush.");
-        // let num_particles = input<u32>(num_particles);
 
         if let Some(num) = input::<u32>() {
-            // num_particles = num;
             break num;
         } else {
-            continue;
+            println!("Not a valid number. Please try again.");
         }
     };
 
@@ -60,38 +58,27 @@ fn main() {
         );
 
     let mut i = 0;
-    loop {
-        match time_at_collision(&particle1, &particle2) {
-            Some (time) => {
-                // Find positions for the two particles at t.
-                let r_t1 = (particle1.position)
-                    .add(&(particle1.velocity).mul(time));
-                let r_t2 = (particle2.position)
-                    .add(&(particle2.velocity).mul(time));
-                particle1.position = r_t1;
-                particle2.position = r_t2;
+    loop { 
+        println!("Intial parameters:\n");
+        println!("PARTICLE1: {:#?}", particle1);
+        println!("PARTICLE2: {:#?}", particle2);
+        println!("---------------------------------------");
 
-                match velocity_f(&mut particle1, &mut particle2) {
-                    Some((v1, v2)) => {
-                        particle1.velocity = v1;
-                        particle2.velocity = v2;
-                    }
-                    None => {
-                        println!("It's over.");
-                        break;
-                    }
-                };
 
-                println!("PARTICLE1: {:#?}", particle1);
-                println!("PARTICLE2: {:#?}", particle2);
-            }
-            None => {
-                println!("No more collisions.");
-                break;
-            }
+        if let Some((time, new_particle1, new_particle2)) = detect_collision(particle1, particle2) {
+            particle1 = new_particle1;
+            particle2 = new_particle2;
+
+            println!("time = {}", time);
+            println!("PARTICLE1: {:#?}", particle1);
+            println!("PARTICLE2: {:#?}", particle2);
+
+            println!("\n==============================\n\n");
+        } else {
+            break;
         }
 
-        if i > 6 {
+        if i > 3 {
             break;
         };
         i += 1;
@@ -101,10 +88,9 @@ fn main() {
 }
 
 
-
-// =======================================================
-// ---------- Functions, Structs and Other Stuff ---------
-// =======================================================
+// ===========================================================
+// ----------- Functions, Structs and Other Stuff ------------
+// ===========================================================
 
 #[derive(Debug, Clone, Copy)]
 struct Vector {
@@ -162,6 +148,54 @@ impl Particle {
 // ======================================================
 // ======================================================
 
+// We need the initial positions, final positions and time to
+// animate the collision. Initial positions can be found from
+// the struct. Time can be returned. Final position can be 
+// found from the modified struct.
+
+fn detect_collision(mut particle1: Particle, mut particle2: Particle) 
+    -> Option<(f64, Particle, Particle)>
+{
+    let time = time_at_collision(&particle1, &particle2)?;
+    let r_t1 = (particle1.position)
+        .add(&(particle1.velocity).mul(time));
+    let r_t2 = (particle2.position)
+        .add(&(particle2.velocity).mul(time));
+    particle1.position = r_t1;
+    particle2.position = r_t2;
+
+    let (v1, v2) = velocity_f(&mut particle1, &mut particle2)?;
+    particle1.velocity = v1;
+    particle2.velocity = v2;
+
+    Some((time, particle1, particle2))
+
+    // match time_at_collision(&particle1, &particle2) {
+    //     Some (time) => {
+    //          // Find positions for the two particles at t.
+    //         let r_t1 = (particle1.position)
+    //             .add(&(particle1.velocity).mul(time));
+    //         let r_t2 = (particle2.position)
+    //             .add(&(particle2.velocity).mul(time));
+    //         *particle1.position = r_t1;
+    //         *particle2.position = r_t2;
+
+    //         match velocity_f(&mut particle1, &mut particle2) {
+    //             Some((v1, v2)) => {
+    //                 particle1.velocity = v1;
+    //                 particle2.velocity = v2;
+    //             }
+    //             None => None
+    //         };
+
+    //         println!("PARTICLE1: {:#?}", particle1);
+    //         println!("PARTICLE2: {:#?}", particle2);
+
+    //         return Some(time);
+    //     }
+    //     None => None
+    // }
+}
 
 fn time_at_collision(particle1: &Particle, particle2: &Particle) -> Option<f64>
 {
@@ -210,7 +244,6 @@ fn velocity_f(particle1: &Particle, particle2: &Particle) -> Option<(Vector, Vec
 
     }
     println!("Particles are not colliding.");
-    // return ((*v_i1).clone(), (*v_i2).clone());
     None
 }
 
@@ -229,11 +262,11 @@ fn quadratic(a: f64, b: f64, c: f64) -> Option<(f64, f64)>
     let root1    = rational + radical;
     let root2    = rational - radical;
 
+    println!("From quadratic fn (line 304), t = {}", root1);
+
     Some((root1, root2))
 }
 
-// line 24
-// where T: std::fmt::Debug
 
 fn input<T: std::str::FromStr>() -> Option<T> {
     let mut buffer = String::new();
@@ -244,7 +277,6 @@ fn input<T: std::str::FromStr>() -> Option<T> {
     match buffer.trim().parse::<T>() {
         Ok(value) => Some(value),
         Err(_)  => {
-            println!("Not a number.");
             None
         }
     }
