@@ -1,14 +1,15 @@
-use std::io::{self, Write};
+// use std::io::{self, Write};
+use std::collections::Hashmap;
 
-const HEIGHT: u32 = 300;
-const WIDTH:  u32 = 400;
+// const HEIGHT: u32 = 300;
+// const WIDTH:  u32 = 400;
 
 fn main() {
     println!("BILLIARD\n========\n");
     
 
 
-    let particles: Vec<Vector> = Vec::new();
+    let mut particles: Vec<Particle> = Vec::new();
 
 
 
@@ -18,19 +19,19 @@ fn main() {
     // %>÷;[#,[#>#&>@^^@^<@:@&!^!<!^@@@&@>;@>×<×&×>×;×&××
     // %>÷;[#,[#>#&>@^^@^<@:@&!^!<!^@@@&@>;@>×<×&×>×;×&××
 
-    let num_particles = loop {
-        print!("Number of particles: ");
-        io::stdout().flush().expect("Failed to flush.");
+    // let num_particles = loop {
+    //     print!("Number of particles: ");
+    //     io::stdout().flush().expect("Failed to flush.");
 
-        if let Some(num) = input::<u32>() {
-            break num;
-        } else {
-            println!("Not a valid number. Please try again.");
-        }
-    };
+    //     if let Some(num) = input::<u32>() {
+    //         break num;
+    //     } else {
+    //         println!("Not a valid number. Please try again.");
+    //     }
+    // };
 
 
-    println!("Number of particles = {}", num_particles);
+    // println!("Number of particles = {}", num_particles);
     
 
 
@@ -42,35 +43,162 @@ fn main() {
 
     // positions and velocities of two particles
 
-    let mut particle1 = Particle::new(
-        Vector::new(-4.0, 0.0),
-        Vector::new(4.0, 1.0),
-        5.0,
-        1.0,
-        );
+    let num = 7;
 
-    let mut particle2 = Particle::new(
-        Vector::new(4.0, 2.0),
-        Vector::new(-2.0, -1.0),
-        1.0,
-        1.0,
-        );
+    let particle1 = Particle::new(Vector::new(-4.0, 0.0), Vector::new(4.0, 1.0), 5.0, 1.0,);
+    let particle2 = Particle::new(Vector::new(4.0, 2.0), Vector::new(-2.0, -1.0), 1.0, 1.0,);
+    let particle3 = Particle::new(Vector::new( 18.0,  12.0), Vector::new(-3.0,  3.0), 1.5, 1.0);
+    let particle4 = Particle::new(Vector::new(-10.0,  16.0), Vector::new( 6.0,  1.0), 2.0, 2.0);
+    let particle5 = Particle::new(Vector::new( -3.0,  30.0), Vector::new( 1.0, -5.0), 1.5, 1.5);
+    let particle6 = Particle::new(Vector::new(-21.0,  -5.0), Vector::new( 5.0, -3.0), 2.0, 2.0);
+    let particle7 = Particle::new(Vector::new(-11.0,  -8.0), Vector::new(-3.0,  2.0), 2.0, 2.0);
+
+    particles.push(particle1);
+    particles.push(particle2);
+    particles.push(particle3);
+    particles.push(particle4);
+    particles.push(particle5);
+    particles.push(particle6);
+    particles.push(particle7);
+
+
+// Get a vector of particles. Loop through them using a two
+// level nested loop to calculate the time of collision for
+// all the possible combinations of particles. For example,
+// find the time at collision for all possible combinations
+// with particke A. Take the smallest of that time since that
+// happens first. Repeat the same for particle B and so on.
+// Collect these smallest values and their corresponding
+// particle pairs. Find the smallest value of time from this
+// collection. We have a delta_time. If this smallest time is
+// lesser than delta_time, calculate its value after collision
+// and update the position of every particle after that small
+// time. Draw the particles. Sleep for that small time. Else
+// change the position of the particles by delta_time. Draw
+// the particles. Sleep for delta_time. Then go back to the 
+// nested loop and this cycle goes on.
+
+
+    loop {
+        let delta_time: f64     = 1.0 / 60.0;
+
+        let mut colliding_pairs = HashMap::new();
+        let mut pairs           = HashMap::new();
+
+        for i in 0..num {
+            for j in 0..num {
+                if i == j {
+                    continue;
+                }
+                // HANDLE ERROR!
+                let time = time_at_collision(&particles[i], &particles[j]);
+                pairs.insert(time.to_string(), particles[j]);
+            }
+
+            if let Some(t_min) = pairs.keys().min() {
+                let t_min = t_min.to_string();
+                colliding_pairs.insert(t_min, (particles[i], pairs.get(t_min));
+            } else {
+                println!("Not colliding. From the time Hashmap.");
+            }
+            pairs.clear();
+        }
+        // End of i loop ^
+
+        // FUCK! Just realized I can't use a float as a key.
+        // Fine. Let's write the rest of the logic then.
+        
+        let t_min = 0;
+        // Smallest of the smallest t.
+        if let Some(t_min) = colliding_pairs.keys().min() {
+            t_min = t_min.parse().unwrap(); 
+        }
+        if t_min < delta_time {
+            
+        }
+
+    }
+
+
+
+
+
+
+
+    // for _ in 0..num {
+    //     let (rx, ry) = loop {
+    //         print!("Enter the position separated by whitespace: ");
+    //         io::flush().expect("Failed to flush.");
+    //         if let Some((x, y)) = input::<(f64, f64)>() {
+    //             break (x, y);
+    //         } else {
+    //             println!("Invalid input. Please try again.");
+    //         }
+    //     };
+
+    //     let (vx, vy) = loop {
+    //         print!("Enter the velocity separated by whitespace: ");
+    //         io::flush().expect("Failed to flush.");
+    //         if let Some((x, y)) = input::<(f64, f64)>() {
+    //             break (x, y);
+    //         } else {
+    //             println!("Invalid input. Please try again.");
+    //         }
+    //     };
+
+    //     let mass = loop {
+    //         print!("Enter the mass of the particle: ");
+    //         io::flush().expect("Failed to flush.");
+    //         if let Some(mass) = input::<f64>() {
+    //             break mass;
+    //         } else {
+    //             println!("Invalid input. Please try again.");
+    //         }
+    //     };
+
+    //     let radius = loop {
+    //         print!("Enter the radius of the particle: ");
+    //         io::flush().expect("Failed to flush.");
+    //         if let Some(radius) = input::<f64>() {
+    //             break radius;
+    //         } else {
+    //             println!("Invalid input. Please try again.");
+    //         }
+    //     };
+    //     
+    // // particles.push(particle1);
+    // // particles.push(particle2);
+    // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     let mut i = 0;
     loop { 
         println!("Intial parameters:\n");
-        println!("PARTICLE1: {:#?}", particle1);
-        println!("PARTICLE2: {:#?}", particle2);
+        println!("PARTICLE1: {:#?}", particles[0]);
+        println!("PARTICLE2: {:#?}", particles[1]);
         println!("---------------------------------------");
 
 
-        if let Some((time, new_particle1, new_particle2)) = detect_collision(particle1, particle2) {
-            particle1 = new_particle1;
-            particle2 = new_particle2;
+        if let Some((time, new_particle1, new_particle2)) = detect_collision(particles[0], particles[1]) {
+            particles[0] = new_particle1;
+            particles[1] = new_particle2;
 
             println!("time = {}", time);
-            println!("PARTICLE1: {:#?}", particle1);
-            println!("PARTICLE2: {:#?}", particle2);
+            println!("PARTICLE1: {:#?}", particles[0]);
+            println!("PARTICLE2: {:#?}", particles[1]);
 
             println!("\n==============================\n\n");
         } else {
@@ -135,12 +263,12 @@ struct Particle {
 
 impl Particle {
     pub fn new(position: Vector, velocity: Vector, mass: f64, radius: f64) -> Self {
-            Particle {
-                position,
-                velocity,
-                mass,
-                radius,
-            }
+        Particle {
+            position,
+            velocity,
+            mass,
+            radius,
+        }
     }
 }
 
@@ -241,16 +369,16 @@ fn quadratic(a: f64, b: f64, c: f64) -> Option<(f64, f64)>
 }
 
 
-fn input<T: std::str::FromStr>() -> Option<T> {
-    let mut buffer = String::new();
-    io::stdin()
-        .read_line(&mut buffer)
-        .expect("Failed to read number."); 
-
-    match buffer.trim().parse::<T>() {
-        Ok(value) => Some(value),
-        Err(_)  => {
-            None
-        }
-    }
-}
+// fn input<T: std::str::FromStr>() -> Option<T> {
+//     let mut buffer = String::new();
+//     io::stdin()
+//         .read_line(&mut buffer)
+//         .expect("Failed to read number."); 
+// 
+//     match buffer.trim().parse::<T>() {
+//         Ok(value) => Some(value),
+//         Err(_)  => {
+//             None
+//         }
+//     }
+// }
