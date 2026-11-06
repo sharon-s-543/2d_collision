@@ -1,5 +1,5 @@
 // use std::io::{self, Write};
-use std::collections::Hashmap;
+use std::collections::HashMap;
 
 // const HEIGHT: u32 = 300;
 // const WIDTH:  u32 = 400;
@@ -91,13 +91,16 @@ fn main() {
                     continue;
                 }
                 // HANDLE ERROR!
-                let time = time_at_collision(&particles[i], &particles[j]);
+                let time: f64;
+                if let Some(t) = time_at_collision(&particles[i], &particles[j]) {
+                    time = t;
+                }
                 pairs.insert(time.to_string(), particles[j]);
             }
 
             if let Some(t_min) = pairs.keys().min() {
-                let t_min = t_min.to_string();
-                colliding_pairs.insert(t_min, (particles[i], pairs.get(t_min));
+                let t_min_key  = t_min.to_string();
+                colliding_pairs.insert(t_min_key, (particles[i], pairs.get(t_min_key)));
             } else {
                 println!("Not colliding. From the time Hashmap.");
             }
@@ -108,14 +111,60 @@ fn main() {
         // FUCK! Just realized I can't use a float as a key.
         // Fine. Let's write the rest of the logic then.
         
-        let t_min = 0;
+        let t_min: f64;
+        let mut t_min_key = String::new();
+
         // Smallest of the smallest t.
-        if let Some(t_min) = colliding_pairs.keys().min() {
-            t_min = t_min.parse().unwrap(); 
+        if let Some(key) = colliding_pairs.keys().min() {
+            t_min_key = key;
+            t_min     = key.parse().unwrap(); 
         }
-        if t_min < delta_time {
+
+        // if t_min < delta_time {
+        
+        // Take the two particles from the hashmap and send to
+        // the detect_collision function to get updated data.
+        for (key, val) in colliding_pairs.iter() {
+            let p1 = (colliding_pairs[&key]).0;
+            let p2 = (colliding_pairs[&key]).1;
             
+            if t_min < delta_time {
+                let particles = if let Some((particle1, particle2))
+                    = detect_collision(p1, p2, t_min) {
+                        (particle1, particle2)
+                };
+
+                // >>>> DRAW particle1 AND particle2 >>>>
+            } else {
+    /**/
+
+
+
+                
+                let p1 = (colliding_pairs[&key]).0;
+                let p2 = (colliding_pairs[&key]).1;
+
+                let r_t1 = (p1.position)
+                    .add(&(p1.velocity).mul(delta_time));
+                let r_t2 = (p2.position)
+                    .add(&(p2.velocity).mul(delta_time));
+                p1.position = r_t1;
+                p2.position = r_t2;
+
+
+
+
+    /**/
+            }
         }
+            
+        // But here we need to loop through colliding_pairs
+        // and do these calculations with every pairs of
+        // particles and draw them. I haven't added a loop.
+
+        // } else {
+        //     
+        // }
 
     }
 
@@ -184,34 +233,34 @@ fn main() {
 
 
 
-    let mut i = 0;
-    loop { 
-        println!("Intial parameters:\n");
-        println!("PARTICLE1: {:#?}", particles[0]);
-        println!("PARTICLE2: {:#?}", particles[1]);
-        println!("---------------------------------------");
+    // let mut i = 0;
+    // loop { 
+    //     println!("Intial parameters:\n");
+    //     println!("PARTICLE1: {:#?}", particles[0]);
+    //     println!("PARTICLE2: {:#?}", particles[1]);
+    //     println!("---------------------------------------");
 
 
-        if let Some((time, new_particle1, new_particle2)) = detect_collision(particles[0], particles[1]) {
-            particles[0] = new_particle1;
-            particles[1] = new_particle2;
+    //     if let Some((time, new_particle1, new_particle2)) = detect_collision(particles[0], particles[1]) {
+    //         particles[0] = new_particle1;
+    //         particles[1] = new_particle2;
 
-            println!("time = {}", time);
-            println!("PARTICLE1: {:#?}", particles[0]);
-            println!("PARTICLE2: {:#?}", particles[1]);
+    //         println!("time = {}", time);
+    //         println!("PARTICLE1: {:#?}", particles[0]);
+    //         println!("PARTICLE2: {:#?}", particles[1]);
 
-            println!("\n==============================\n\n");
-        } else {
-            break;
-        }
+    //         println!("\n==============================\n\n");
+    //     } else {
+    //         break;
+    //     }
 
-        if i > 3 {
-            break;
-        };
-        i += 1;
-    }
+    //     if i > 3 {
+    //         break;
+    //     };
+    //     i += 1;
+    // }
 
-    println!("\n\nI AM i {}\n", i);
+    // println!("\n\nI AM i {}\n", i);
 }
 
 
@@ -280,10 +329,10 @@ impl Particle {
 // the struct. Time can be returned. Final position can be 
 // found from the modified struct.
 
-fn detect_collision(mut particle1: Particle, mut particle2: Particle) 
-    -> Option<(f64, Particle, Particle)>
+fn detect_collision(mut particle1: Particle, mut particle2: Particle, time: f64) 
+    -> Option<(Particle, Particle)>
 {
-    let time = time_at_collision(&particle1, &particle2)?;
+    // let time = time_at_collision(&particle1, &particle2)?;
     let r_t1 = (particle1.position)
         .add(&(particle1.velocity).mul(time));
     let r_t2 = (particle2.position)
@@ -295,7 +344,7 @@ fn detect_collision(mut particle1: Particle, mut particle2: Particle)
     particle1.velocity = v1;
     particle2.velocity = v2;
 
-    Some((time, particle1, particle2))
+    Some((particle1, particle2))
 }
 
 fn time_at_collision(particle1: &Particle, particle2: &Particle) -> Option<f64>
