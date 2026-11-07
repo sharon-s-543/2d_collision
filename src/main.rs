@@ -51,105 +51,50 @@ fn main() {
 //
 
     loop {
-        let mut colliding_pairs = HashMap::new();
-        let mut pairs           = HashMap::new();
-        // let mut smallest_time   = f64::INFINITY;
-
-        let mut pairs: Vec<(&Particle, &Particle)> = Vec::new();
-        let mut times_at_collision: Vec<f64> = Vec::new();
+        let mut pairs: Vec<(&Particle,&Particle)> =Vec::new();
+        let mut times_at_collision = vec![delta_time];
 
         for i in 0..particles.len() {
             for j in (i + 1)..particles.len() {
+
                 let time: f64;
                 if let Some(t) = time_at_collision(&particles[i], &particles[j]) {
-                    let time = t;
-                // pairs.insert(time.to_string(), particles[j]);
+                    time = t;
                 }
 
-                if time < smallest_time {
-                    smallest_time = time;
-
-                    // Come back later!!!
-                    // After making that struct.
-                    
-                    let p1: Particle;
-                    let p2: Particle;
-                    if let Some((p1, p2)) 
-                        = detect_collision(particles[i], particles[j], time) {
-                        p1 = p1;
-                        p2 = p2;
-                    }
-                    pairs.push((&p1, &p2));
+                if time < delta_time {    
+                    pairs.push((&particles[i],&particles[j]));
                     times_at_collision.push(time);
                 }
             }
-            // End of j loop ^
-
-            if let Some(t_min) = pairs.keys().min() {
-                let t_min_key = t_min.to_string();
-                let particle2 = match pairs.get(&t_min_key) {
-                    Some(particle2) => particle2,
-                    None            => {},
-                };
-                colliding_pairs.insert(t_min_key, (particles[i], particle2));
-            } else {
-                println!("Not colliding. From the time Hashmap.");
-            }
-            pairs.clear();
         }
 
-        // End of i loop ^
-
-        // FUCK! Just realized I can't use a float as a key.
-        // Fine. Let's write the rest of the logic then.
+        // Find the smallest global time and its index.
+        // Find the particles at the index.
+        // Update the position by smallest_time and apply
+        // detect_collison for each pairs.
         
-        let t_min: f64;
-        let mut t_min_key = String::new();
+        // !!!
+        // !!! WARNING !!!
+        // POSSIBLE PROBLEMS WITH SIMULTANEOUS COLLISIONS!!!
+        // !!!
 
-        // Smallest of the smallest t.
-        if let Some(key) = colliding_pairs.keys().min() {
-            t_min_key = key.to_string();
-            t_min     = key.parse().unwrap(); 
-        }
-
-        // if t_min < delta_time {
-        
-        // Take the two particles from the hashmap and send to
-        // the detect_collision function to get updated data.
-        for (key, val) in colliding_pairs.iter() {
-            let p1 = (colliding_pairs[key]).0;
-            let p2 = (colliding_pairs[key]).1;
-            
-            if t_min < delta_time {
-                let particles = if let Some((particle1, particle2))
-                    = detect_collision(p1, p2, t_min) {
-                        (particle1, particle2)
-                };
-
-                // >>>> DRAW particle1 AND particle2 >>>>
-            } else {
-    /**/
-
-
-
-                
-                let p1 = (colliding_pairs[key]).0;
-                let p2 = (colliding_paits[key]).1;
-
-                let r_t1 = (p1.position)
-                    .add(&(p1.velocity).mul(delta_time));
-                let r_t2 = (p2.position)
-                    .add(&(p2.velocity).mul(delta_time));
-                p1.position = r_t1;
-                p2.position = r_t2;
-
-
-
-
-    /**/
+        let mut smallest_time = f64::INFINITY;
+        let mut index: i32;
+        for i in 0..times_at_collision.len() {
+            if times_at_collision[i] < smallest_time {
+                smallest_time = time_at_collision[i];
+                index         = i;
             }
         }
-            
+
+        // Draw the particle at pairs[index].
+        
+        for pair in &pairs {
+            detect_collision();
+        }
+
+ 
         // But here we need to loop through colliding_pairs
         // and do these calculations with every pairs of
         // particles and draw them. I haven't added a loop.
@@ -266,6 +211,8 @@ fn detect_collision(mut particle1: Particle, mut particle2: Particle, time: f64)
 
     Some((particle1, particle2))
 }
+
+
 
 fn time_at_collision(particle1: &Particle, particle2: &Particle) -> Option<f64>
 {
