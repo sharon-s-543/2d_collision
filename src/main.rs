@@ -1,4 +1,3 @@
-// use std::io::{self, Write};
 use std::collections::HashMap;
 
 // const HEIGHT: u32 = 300;
@@ -6,44 +5,10 @@ use std::collections::HashMap;
 
 fn main() {
     println!("BILLIARD\n========\n");
-    
-
 
     let mut particles: Vec<Particle> = Vec::new();
 
-
-
-    // %>÷;[#,[#>#&>@^^@^<@:@&!^!<!^@@@&@>;@>×<×&×>×;×&××
-    // %>÷;[#,[#>#&>@^^@^<@:@&!^!<!^@@@&@>;@>×<×&×>×;×&××
-    // ========== POSSIBLY GONNA CHANGE LATER ===========
-    // %>÷;[#,[#>#&>@^^@^<@:@&!^!<!^@@@&@>;@>×<×&×>×;×&××
-    // %>÷;[#,[#>#&>@^^@^<@:@&!^!<!^@@@&@>;@>×<×&×>×;×&××
-
-    // let num_particles = loop {
-    //     print!("Number of particles: ");
-    //     io::stdout().flush().expect("Failed to flush.");
-
-    //     if let Some(num) = input::<u32>() {
-    //         break num;
-    //     } else {
-    //         println!("Not a valid number. Please try again.");
-    //     }
-    // };
-
-
-    // println!("Number of particles = {}", num_particles);
-    
-
-
-    // %>÷;[#,[#>#&>@^^@^<@:@&!^!<!^@@@&@>;@>×<×&×>×;×&××
-    // %>÷;[#,[#>#&>@^^@^<@:@&!^!<!^@@@&@>;@>×<×&×>×;×&××
-    // ========== POSSIBLY GONNA CHANGE LATER ===========
-    // %>÷;[#,[#>#&>@^^@^<@:@&!^!<!^@@@&@>;@>×<×&×>×;×&××
-    // %>÷;[#,[#>#&>@^^@^<@:@&!^!<!^@@@&@>;@>×<×&×>×;×&××
-
     // positions and velocities of two particles
-
-    let num = 7;
 
     let particle1 = Particle::new(Vector::new(-4.0, 0.0), Vector::new(4.0, 1.0), 5.0, 1.0,);
     let particle2 = Particle::new(Vector::new(4.0, 2.0), Vector::new(-2.0, -1.0), 1.0, 1.0,);
@@ -79,33 +44,60 @@ fn main() {
 // nested loop and this cycle goes on.
 
 
-    loop {
-        let delta_time: f64     = 1.0 / 60.0;
+    let delta_time: f64     = 1.0 / 60.0;
 
+// 
+// DRAW THE BACKGROUND AND PARTICLES AT INITIAL POSITIONS HERE
+//
+
+    loop {
         let mut colliding_pairs = HashMap::new();
         let mut pairs           = HashMap::new();
+        // let mut smallest_time   = f64::INFINITY;
 
-        for i in 0..num {
-            for j in 0..num {
-                if i == j {
-                    continue;
-                }
-                // HANDLE ERROR!
+        let mut pairs: Vec<(&Particle, &Particle)> = Vec::new();
+        let mut times_at_collision: Vec<f64> = Vec::new();
+
+        for i in 0..particles.len() {
+            for j in (i + 1)..particles.len() {
                 let time: f64;
                 if let Some(t) = time_at_collision(&particles[i], &particles[j]) {
-                    time = t;
+                    let time = t;
+                // pairs.insert(time.to_string(), particles[j]);
                 }
-                pairs.insert(time.to_string(), particles[j]);
+
+                if time < smallest_time {
+                    smallest_time = time;
+
+                    // Come back later!!!
+                    // After making that struct.
+                    
+                    let p1: Particle;
+                    let p2: Particle;
+                    if let Some((p1, p2)) 
+                        = detect_collision(particles[i], particles[j], time) {
+                        p1 = p1;
+                        p2 = p2;
+                    }
+                    pairs.push((&p1, &p2));
+                    times_at_collision.push(time);
+                }
             }
+            // End of j loop ^
 
             if let Some(t_min) = pairs.keys().min() {
-                let t_min_key  = t_min.to_string();
-                colliding_pairs.insert(t_min_key, (particles[i], pairs.get(t_min_key)));
+                let t_min_key = t_min.to_string();
+                let particle2 = match pairs.get(&t_min_key) {
+                    Some(particle2) => particle2,
+                    None            => {},
+                };
+                colliding_pairs.insert(t_min_key, (particles[i], particle2));
             } else {
                 println!("Not colliding. From the time Hashmap.");
             }
             pairs.clear();
         }
+
         // End of i loop ^
 
         // FUCK! Just realized I can't use a float as a key.
@@ -116,7 +108,7 @@ fn main() {
 
         // Smallest of the smallest t.
         if let Some(key) = colliding_pairs.keys().min() {
-            t_min_key = key;
+            t_min_key = key.to_string();
             t_min     = key.parse().unwrap(); 
         }
 
@@ -125,8 +117,8 @@ fn main() {
         // Take the two particles from the hashmap and send to
         // the detect_collision function to get updated data.
         for (key, val) in colliding_pairs.iter() {
-            let p1 = (colliding_pairs[&key]).0;
-            let p2 = (colliding_pairs[&key]).1;
+            let p1 = (colliding_pairs[key]).0;
+            let p2 = (colliding_pairs[key]).1;
             
             if t_min < delta_time {
                 let particles = if let Some((particle1, particle2))
@@ -141,8 +133,8 @@ fn main() {
 
 
                 
-                let p1 = (colliding_pairs[&key]).0;
-                let p2 = (colliding_pairs[&key]).1;
+                let p1 = (colliding_pairs[key]).0;
+                let p2 = (colliding_paits[key]).1;
 
                 let r_t1 = (p1.position)
                     .add(&(p1.velocity).mul(delta_time));
@@ -166,106 +158,34 @@ fn main() {
         //     
         // }
 
+        std::thread::sleep(std::time::Duration::from_secs(delta_time));
     }
-
-
-
-
-
-
-
-    // for _ in 0..num {
-    //     let (rx, ry) = loop {
-    //         print!("Enter the position separated by whitespace: ");
-    //         io::flush().expect("Failed to flush.");
-    //         if let Some((x, y)) = input::<(f64, f64)>() {
-    //             break (x, y);
-    //         } else {
-    //             println!("Invalid input. Please try again.");
-    //         }
-    //     };
-
-    //     let (vx, vy) = loop {
-    //         print!("Enter the velocity separated by whitespace: ");
-    //         io::flush().expect("Failed to flush.");
-    //         if let Some((x, y)) = input::<(f64, f64)>() {
-    //             break (x, y);
-    //         } else {
-    //             println!("Invalid input. Please try again.");
-    //         }
-    //     };
-
-    //     let mass = loop {
-    //         print!("Enter the mass of the particle: ");
-    //         io::flush().expect("Failed to flush.");
-    //         if let Some(mass) = input::<f64>() {
-    //             break mass;
-    //         } else {
-    //             println!("Invalid input. Please try again.");
-    //         }
-    //     };
-
-    //     let radius = loop {
-    //         print!("Enter the radius of the particle: ");
-    //         io::flush().expect("Failed to flush.");
-    //         if let Some(radius) = input::<f64>() {
-    //             break radius;
-    //         } else {
-    //             println!("Invalid input. Please try again.");
-    //         }
-    //     };
-    //     
-    // // particles.push(particle1);
-    // // particles.push(particle2);
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // let mut i = 0;
-    // loop { 
-    //     println!("Intial parameters:\n");
-    //     println!("PARTICLE1: {:#?}", particles[0]);
-    //     println!("PARTICLE2: {:#?}", particles[1]);
-    //     println!("---------------------------------------");
-
-
-    //     if let Some((time, new_particle1, new_particle2)) = detect_collision(particles[0], particles[1]) {
-    //         particles[0] = new_particle1;
-    //         particles[1] = new_particle2;
-
-    //         println!("time = {}", time);
-    //         println!("PARTICLE1: {:#?}", particles[0]);
-    //         println!("PARTICLE2: {:#?}", particles[1]);
-
-    //         println!("\n==============================\n\n");
-    //     } else {
-    //         break;
-    //     }
-
-    //     if i > 3 {
-    //         break;
-    //     };
-    //     i += 1;
-    // }
-
-    // println!("\n\nI AM i {}\n", i);
 }
 
 
 // ===========================================================
 // ----------- Functions, Structs and Other Stuff ------------
+// ===========================================================
+
+struct Pair {
+    particles: Vec<(Particle, Particle)>,
+    time: Vec<f64>,
+}
+
+impl Pair {
+    pub fn new(particle1: &Particle, particle2: &Particle, time: f64) 
+        -> (Self, Vec<f64>, Vec<f64>) {
+        let mut time      = Vec::new();
+        let mut particles = Vec::new();
+        let pair          = Pair {
+            particles: particles.push((particle1, particle2)),
+            time: time,
+        };
+
+        (pair, particles, time)
+    }
+}
+
 // ===========================================================
 
 #[derive(Debug, Clone, Copy)]
@@ -416,18 +336,3 @@ fn quadratic(a: f64, b: f64, c: f64) -> Option<(f64, f64)>
 
     Some((root1, root2))
 }
-
-
-// fn input<T: std::str::FromStr>() -> Option<T> {
-//     let mut buffer = String::new();
-//     io::stdin()
-//         .read_line(&mut buffer)
-//         .expect("Failed to read number."); 
-// 
-//     match buffer.trim().parse::<T>() {
-//         Ok(value) => Some(value),
-//         Err(_)  => {
-//             None
-//         }
-//     }
-// }
