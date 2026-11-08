@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 // const HEIGHT: u32 = 300;
 // const WIDTH:  u32 = 400;
 
@@ -51,19 +49,19 @@ fn main() {
 //
 
     loop {
-        let mut pairs: Vec<(&Particle,&Particle)> =Vec::new();
+        let mut pairs: Vec<(&Particle, &Particle, usize, usize)> =Vec::new();
         let mut times_at_collision = vec![delta_time];
 
         for i in 0..particles.len() {
             for j in (i + 1)..particles.len() {
 
-                let time: f64;
+                let mut time = f64::INFINITY;
                 if let Some(t) = time_at_collision(&particles[i], &particles[j]) {
                     time = t;
                 }
 
                 if time < delta_time {    
-                    pairs.push((&particles[i],&particles[j]));
+                    pairs.push((&particles[i], &particles[j], i, j));
                     times_at_collision.push(time);
                 }
             }
@@ -80,57 +78,48 @@ fn main() {
         // !!!
 
         let mut smallest_time = f64::INFINITY;
-        let mut index: i32;
+        let mut index: usize;
         for i in 0..times_at_collision.len() {
             if times_at_collision[i] < smallest_time {
-                smallest_time = time_at_collision[i];
+                smallest_time = times_at_collision[i];
                 index         = i;
             }
         }
 
-        // Draw the particle at pairs[index].
-        
-        for pair in &pairs {
-            detect_collision();
+        // POSSIBLE ERRORS WITH THIS ONE 👇
+        for particle in &mut particles {
+            let r_t = (&particle.position)
+                .add(&(particle.velocity).mul(smallest_time));
+            particle.position = r_t;
         }
 
- 
-        // But here we need to loop through colliding_pairs
-        // and do these calculations with every pairs of
-        // particles and draw them. I haven't added a loop.
+        let mut p1 = pairs[index].0;
+        let mut p2 = pairs[index].1;
+        let i      = pairs[index].2;
+        let j      = pairs[index].3;
+        
+        if let Some((v1, v2)) = velocity_f(&mut p1, &mut p2) {
+            particles[i].velocity = v1;
+            particles[j].velocity = v2;
+        }
 
-        // } else {
-        //     
-        // }
+        // Draw the particle at pairs[index].
+    
 
-        std::thread::sleep(std::time::Duration::from_secs(delta_time));
+        // Calculate possible collision times for particle pairs.
+        // Find the earliest valid collision time.
+        // Advance the entire system to that time.
+        // Resolve the collision and update the involved particles' velocities.
+        // Recalculate affected collision predictions.
+        // Repeat until the desired simulation time is reached.
+
+        std::thread::sleep(std::time::Duration::from_secs_f64(smallest_time));
     }
 }
 
 
 // ===========================================================
 // ----------- Functions, Structs and Other Stuff ------------
-// ===========================================================
-
-struct Pair {
-    particles: Vec<(Particle, Particle)>,
-    time: Vec<f64>,
-}
-
-impl Pair {
-    pub fn new(particle1: &Particle, particle2: &Particle, time: f64) 
-        -> (Self, Vec<f64>, Vec<f64>) {
-        let mut time      = Vec::new();
-        let mut particles = Vec::new();
-        let pair          = Pair {
-            particles: particles.push((particle1, particle2)),
-            time: time,
-        };
-
-        (pair, particles, time)
-    }
-}
-
 // ===========================================================
 
 #[derive(Debug, Clone, Copy)]
@@ -165,7 +154,7 @@ impl Vector {
     }
 }
 
-// ======================================================
+// ===========================================================
 
 #[derive(Debug, Clone, Copy)]
 struct Particle {
@@ -186,31 +175,30 @@ impl Particle {
     }
 }
 
-// ======================================================
-// ======================================================
+// ===========================================================
+// ===========================================================
 
 // We need the initial positions, final positions and time to
 // animate the collision. Initial positions can be found from
 // the struct. Time can be returned. Final position can be 
 // found from the modified struct.
 
-fn detect_collision(mut particle1: Particle, mut particle2: Particle, time: f64) 
-    -> Option<(Particle, Particle)>
-{
-    // let time = time_at_collision(&particle1, &particle2)?;
-    let r_t1 = (particle1.position)
-        .add(&(particle1.velocity).mul(time));
-    let r_t2 = (particle2.position)
-        .add(&(particle2.velocity).mul(time));
-    particle1.position = r_t1;
-    particle2.position = r_t2;
-
-    let (v1, v2) = velocity_f(&mut particle1, &mut particle2)?;
-    particle1.velocity = v1;
-    particle2.velocity = v2;
-
-    Some((particle1, particle2))
-}
+// fn detect_collision(mut particle1: Particle, mut particle2: Particle /* , time: f64 */ ) 
+//     -> Option<(Particle, Particle)>
+// {
+//     // let r_t1 = (particle1.position)
+//     //     .add(&(particle1.velocity).mul(time));
+//     // let r_t2 = (particle2.position)
+//     //     .add(&(particle2.velocity).mul(time));
+//     // particle1.position = r_t1;
+//     // particle2.position = r_t2;
+// 
+//     let (v1, v2) = velocity_f(&mut particle1, &mut particle2)?;
+//     particle1.velocity = v1;
+//     particle2.velocity = v2;
+// 
+//     Some((particle1, particle2))
+// }
 
 
 
